@@ -19,7 +19,6 @@
 output
 .*.swp
 .*.swo
-/**/var
 .idea
 /etc
 .vscode
