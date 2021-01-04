@@ -1,19 +1,31 @@
 package cmd
 
 import (
-	"github.com/baetyl/baetyl-go/v2/utils"
+	"fmt"
+	"runtime"
+
+	"github.com/baetyl/baetyl/utils"
 	"github.com/spf13/cobra"
 )
+
+// Compile parameter
+var (
+	Version  string
+	Revision string
+)
+
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "show the version of baetyl",
+	Long:  ``,
+	Run:   version,
+}
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version of Baetyl",
-	Long:  `The versions of Baetyl is as follows`,
-	Run: func(_ *cobra.Command, _ []string) {
-		utils.PrintVersion()
-	},
+func version(cmd *cobra.Command, args []string) {
+	fmt.Printf("Version:      %s\nGit revision: %s\nGo version:   %s\nPlatform:     %s\n\n", Version, Revision, runtime.Version(), utils.GetHostInfo().FormatPlatformInfo())
 }

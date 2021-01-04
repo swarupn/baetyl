@@ -1,98 +1,81 @@
-# BAETYL v2
+# Baetyl
 
-[![Baetyl-logo](./docs/logo_with_name.png)](https://baetyl.io)
+[![Baetyl-logo](./docs/images/logo/logo-with-name.png)](https://baetyl.io)
 
 [![build](https://github.com/baetyl/baetyl/workflows/build/badge.svg)](https://github.com/baetyl/baetyl/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/baetyl/baetyl/branch/master/graph/badge.svg)](https://codecov.io/gh/baetyl/baetyl)
 [![Go Report Card](https://goreportcard.com/badge/github.com/baetyl/baetyl)](https://goreportcard.com/report/github.com/baetyl/baetyl) 
+[![Release](https://img.shields.io/github/v/release/baetyl/baetyl?color=blue&label=release)](https://github.com/baetyl/baetyl/releases) 
 [![License](https://img.shields.io/github/license/baetyl/baetyl?color=blue)](LICENSE) 
 [![Stars](https://img.shields.io/github/stars/baetyl/baetyl?style=social)](Stars)
 
-[![README_CN](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87-brightgreen)](./README_CN.md)
+[![Documentation in English](https://img.shields.io/badge/docs%20in%20English-latest-brightgreen)](https://docs.baetyl.io/en/latest/) [![中文文档](https://img.shields.io/badge/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3-%E6%9C%80%E6%96%B0-brightgreen)](https://docs.baetyl.io/zh_CN/latest/)
 
-**[Baetyl](https://baetyl.io) is an open edge computing framework of
-[Linux Foundation Edge](https://www.lfedge.org) that extends cloud computing,
-data and service seamlessly to edge devices.** It can provide temporary offline, low-latency computing services include device connection, message routing, remote synchronization, function computing, video capture, AI inference, status reporting, configuration ota etc.
 
-Baetyl v2 provides a new edge cloud integration platform, which adopts cloud management and edge operation solutions, and is divided into [**Edge Computing Framework (this project)**](https://github.com/baetyl/baetyl) and [**Cloud Management Suite**](https://github.com/baetyl/baetyl-cloud) supports varius deployment methods. It can manage all resources in the cloud, such as nodes, applications, configuration, etc., and automatically deploy applications to edge nodes to meet various edge computing scenarios. It is especially suitable for emerging strong edge devices, such as AI all-in-one machines and 5G roadside boxes.
+**[Baetyl](https://baetyl.io) is an open edge computing framework of [Linux Foundation Edge](https://www.lfedge.org) that extends cloud computing, data and service seamlessly to edge devices.** It can provide temporary offline, low-latency computing services, and include device connect, message routing, remote synchronization, function computing, video access pre-processing, AI inference, device resources report etc. The combination of Baetyl and the **Cloud Management Suite** of [BIE](https://cloud.baidu.com/product/bie.html)(Baidu IntelliEdge) will achieve cloud management and application distribution, enable applications running on edge devices and meet all kinds of edge computing scenario.
 
-The main differences between v2 and v1 versions are as follows:
-* Edge and cloud frameworks have all evolved to cloud native, and already support running on K8S or K3S.
-* Introduce declarative design, realize data synchronization (OTA) through shadow (Report/Desire).
-* The edge framework currently supports Kube mode. Because it runs on K3S, the overall resource overhead is relatively large (1G memory); the Native mode is under development, which can greatly reduce resource consumption.
-* The edge framework will support edge node clusters in the future.
+About architecture [design](./docs/overview/Design.md), Baetyl takes **modularization** and **containerization** design mode. Based on the modular design pattern, Baetyl splits the product to multiple modules, and make sure each one of them is a separate, independent module. In general, Baetyl can fully meet the conscientious needs of users to deploy on demand. Besides, Baetyl also takes containerization design mode to build images. Due to the cross-platform characteristics of docker to ensure the running environment of each operating system is consistent. In addition, **Baetyl also isolates and limits the resources of containers**, and allocates the CPU, memory and other resources of each running instance accurately to improve the efficiency of resource utilization.
 
-## Architecture
+## Advantages
 
-![Architecture](./docs/baetyl-arch-v2.svg)
+- **Shielding Computing Framework**: Baetyl provides two official computing modules(**Local Function Module** and **Python Runtime Module**), also supports customize module(which can be written in any programming language or any machine learning framework).
+- **Simplify Application Production**: Baetyl combines with **Cloud Management Suite** of BIE and many other productions of Baidu Cloud(such as [CFC](https://cloud.baidu.com/product/cfc.html), [Infinite](https://cloud.baidu.com/product/infinite.html), [EasyEdge](https://ai.baidu.com/easyedge/home), [TSDB](https://cloud.baidu.com/product/tsdb.html), [IoT Visualization](https://cloud.baidu.com/product/iotviz.html)) to provide data calculation, storage, visible display, model training and many more abilities.
+- **Service Deployment on Demand**: Baetyl adopts containerization and modularization design, and each module runs independently and isolated. Developers can choose modules to deploy based on their own needs.
+- **Support multiple platforms**: Baetyl supports multiple hardware and software platforms, such as X86 and ARM CPU, Linux and Darwin operating systems.
 
-### [Edge Computing Framework (this project)](./README.md)
+## Components
 
-The Edge Computing Framework runs on Kubernetes at the edge node,
-manages and deploys all applications which provide various capabilities.
-Applications include system applications and common applications.
-All system applications are officially provided by Baetyl,
-and you do not need to configure them.
+As an edge computing platform, **Baetyl** not only provides features such as underlying service management, but also provides some basic functional modules, as follows:
 
-There are currently several system applications:
-* baetyl-init: responsible for activating the edge node to the cloud
-and initializing baetyl-core, and will exit after all tasks are completed.
-* baetyl-core: responsible for local node management (node),
-data synchronization with cloud (sync) and application deployment (engine).
-* baetyl-function: the proxy for all function runtime services,
-function invocations are passed through this module.
+- Baetyl [Master](./docs/overview/Design.md#master) is responsible for the management of service instances, such as start, stop, supervise, etc., consisting of Engine, API, Command Line. And supports two modes of running service: **native** process mode and **docker** container mode
+- The official module [baetyl-agent](./docs/overview/Design.md#baetyl-agent) is responsible for communication with the BIE cloud management suite, which can be used for application delivery, device information reporting, etc. Mandatory certificate authentication to ensure transmission security;
+- The official module [baetyl-hub](./docs/overview/Design.md#baetyl-hub) provides message subscription and publishing functions based on the [MQTT protocol](http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html), and supports four access methods: TCP, SSL, WS, and WSS;
+- The official module [baetyl-remote-mqtt](./docs/overview/Design.md#baetyl-remote-mqtt) is used to bridge two MQTT Servers for message synchronization and supports configuration of multiple message route rules. ;
+- The official module [baetyl-function-manager](./docs/overview/Design.md#baetyl-function-manager) provides computing power based on MQTT message mechanism, flexible, high availability, good scalability, and fast response;
+- The official module [baetyl-function-python27](./docs/overview/Design.md#baetyl-function-python27) provides the Python2.7 function runtime, which can be dynamically started by `baetyl-function-manager`;
+- The official module [baetyl-function-python36](./docs/overview/Design.md#baetyl-function-python36) provides the Python3.6 function runtime, which can be dynamically started by `baetyl-function-manager`;
+- The official module [baetyl-function-node85](./docs/overview/Design.md#baetyl-function-node85) provides the Node 8.5 function runtime, which can be dynamically started by `baetyl-function-manager`;
+- SDK (Golang) can be used to develop custom modules.
 
-Currently the framework supports Linux/amd64, Linux/arm64, Linux/armv7,
-If the resources of the edge nodes are limited,
-consider to use the lightweight kubernetes: [K3S](https://k3s.io/).
+### Architecture
 
-Hardware requirements scale based on the size of your applications at edge. Minimum recommendations are outlined here.
-* RAM: 1GB Minimum
-* CPU: 1 Minimum
+![Architecture](./docs/images/overview/design/design_overview.png)
 
-### [Cloud Management Suite](https://github.com/baetyl/baetyl-cloud)
+## Installation
 
-The Cloud Management Suite is responsible for managing all resources, including nodes, applications, configuration, and deployment. The realization of all functions is plug-in, which is convenient for function expansion and third-party service access, and provides rich applications. The deployment of the cloud management suite is very flexible. It can be deployed on public clouds, private cloud environments, and common devices. It supports K8S/K3S deployment, and supports single-tenancy and multi-tenancy.
+- [Quick Install Baetyl](https://docs.baetyl.io/en/latest/install/Quick-Install.html)
+- [Install Baetyl From source](https://docs.baetyl.io/en/latest/install/Install-from-source.html)
 
-The basic functions provided by the cloud management suite in this project are as follows:
-* Edge node management
-     * Online installation of edge computing framework
-     * Synchronization (shadow) between edge and cloud
-     * Node information collection
-     * Node status collection
-     * Application status collection
-* Application deployment management
-     * Container application
-     * Function application
-     * Node matching (automatic)
-* Configuration management
-     * Common configuration
-     * Function configuration
-     * Secrets
-     * Certificates
-     * Registry credentials
-* Node provisioning management
-     * Node batch management
-     * Registration and activation
 
-_The open source version contains the RESTful API of all the above functions, but does not include the front-end dashboard. _
+## Guides
+
+- [Baetyl configuration interpretation](https://docs.baetyl.io/en/latest/guides/Config-interpretation.html)
+- [Device connect to Hub Service](https://docs.baetyl.io/en/latest/guides/Device-connect-to-hub-service.html)
+- [Message transferring among devices with Hub Service](https://docs.baetyl.io/en/latest/guides/Message-transfer-among-devices-with-hub-service.html)
+- [Message handling with Function Service](https://docs.baetyl.io/en/latest/guides/Message-handling-with-function-service.html)
+- [Message Synchronize between baetyl-hub and Baidu IoTHub via Remote Service](https://docs.baetyl.io/en/latest/guides/Message-synchronize-with-iothub-through-remote-service.html)
+- [Image capturing and AI model inference with Video infer Service](https://docs.baetyl.io/en/latest/guides/Image-capturing-and-AI-model-inference-with-video-infer-service.html)
+
+## Development
+
+- [Baetyl design](./docs/overview/Design.md)
+- [How to write Python script for Python runtime](https://docs.baetyl.io/en/latest/develop/How-to-write-a-python-script-for-python-runtime.html)
+- [How to write Node script for Node runtime](https://docs.baetyl.io/en/latest/develop/How-to-write-a-node-script-for-node-runtime.html)
+- [How to import third-party libraries for Python runtime](https://docs.baetyl.io/en/latest/develop/How-to-import-third-party-libraries-for-python-runtime.md)
+- [How to import third-party libraries for Node runtime](https://docs.baetyl.io/en/latest/develop/How-to-import-third-party-libraries-for-node-runtime.md)
+- [How to develop a customize runtime for function](https://docs.baetyl.io/en/latest/develop/How-to-develop-a-customize-runtime-for-function.md)
+- [How to develop a customize module for Baetyl](https://docs.baetyl.io/en/latest/develop/How-to-develop-a-customize-module.md)
+
+## Contributing
+
+If you are passionate about contributing to open source community, Baetyl will provide you with both code contributions and document contributions. More details, please see: [How to contribute code or document to Baetyl](./docs/overview/Contributing.md).
 
 ## Contact us
 
-As the first open edge computing framework in China,
-Baetyl aims to create a lightweight, secure,
-reliable and scalable edge computing community
-that will create a good ecological environment.
-In order to create a better development of Baetyl,
-if you have better advice about Baetyl, please contact us:
+As the first open edge computing framework in China, Baetyl aims to create a lightweight, secure, reliable and scalable edge computing community that will create a good ecological environment. In order to create a better development of Baetyl, if you have better advice about Baetyl, please contact us:
 
 - Welcome to join [Baetyl's Wechat](https://baetyl.bj.bcebos.com/Wechat/Wechat-Baetyl.png)
 - Welcome to join [Baetyl's LF Edge Community](https://lists.lfedge.org/g/baetyl/topics)
 - Welcome to send email to <baetyl@lists.lfedge.org>
 - Welcome to [submit an issue](https://github.com/baetyl/baetyl/issues)
 
-## Contributing
-
-If you are passionate about contributing to open source community,
-Baetyl will provide you with both code contributions and document contributions.
-More details, please see: [How to contribute code or document to Baetyl](./docs/contributing.md).
